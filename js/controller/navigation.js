@@ -620,6 +620,21 @@ angular.module('listenone').controller('NavigationController', [
       });
     };
 
+    /**
+     * 保存b站视频合集为歌单
+     */
+    $scope.saveBiliCollect = (url) => {
+      MediaService.saveBiliCollect(url).success((data) => {
+        const { result } = data;
+        if (result !== undefined) {
+          $rootScope.$broadcast('myplaylist:update')
+          $scope.showPlaylist(result.id);
+        } else {
+          notyf.info(i18next.t('_FAIL_OPEN_PLAYLIST_URL'));
+        }
+      });
+    };
+
     $scope.favoritePlaylist = (list_id) => {
       if ($scope.is_favorite) {
         $scope.removeFavoritePlaylist(list_id);

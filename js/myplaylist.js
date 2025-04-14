@@ -129,6 +129,7 @@ const myplaylistFactory = () => {
     playlists.push(playlist_id);
     localStorage.setObject(key, playlists);
     localStorage.setObject(playlist_id, playlist);
+    return playlist_id
   };
 
   const remove_myplaylist = (playlist_type, playlist_id) => {

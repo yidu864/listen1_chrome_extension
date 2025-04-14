@@ -2227,6 +2227,12 @@
                         >
                           {{_CONFIRM}}
                         </button>
+                        <button
+                        class="btn btn-primary confirm-button"
+                        ng-click="saveBiliCollect(dialog_url);closeDialog();dialog_url='';"
+                      >
+                        bili_collect
+                      </button>
                         <button class="btn btn-default" ng-click="closeDialog()">
                           {{_CANCEL}}
                         </button>

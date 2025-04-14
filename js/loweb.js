@@ -322,6 +322,22 @@ const MediaService = {
     };
   },
 
+  /**
+   * 保存b站视频合集为歌单
+   */
+  saveBiliCollect(url) {
+    return {
+      success: (fn) => {
+        // 1. 解析url转成数组并做数据处理
+        const provider = getProviderByName('bilibili')
+        provider.bi_get_collect(url).then(info => {
+          const playlist_id = myplaylist.save_myplaylist("my", info)
+          fn({ result: { id: playlist_id } })
+        }).catch(() => fn({}))
+      },
+    };
+  },
+
   mergePlaylist(source, target) {
     const tarData = localStorage.getObject(target).tracks;
     const srcData = localStorage.getObject(source).tracks;

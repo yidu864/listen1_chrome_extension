@@ -6,6 +6,10 @@
 
 [English Version](https://github.com/listen1/listen1_chrome_extension/blob/master/README_EN.md)
 
+## 较原版不同
+
+- 新增功能 添加b站视频合集(collection)为歌单
+
 ## 缘起
 
 当我发现找个想听的歌因为版权听不了，需要打开好几个网站开始搜索，来回切换让我抓狂的时候，我知道是时候该做点什么了。

@@ -316,6 +316,30 @@ class bilibili {
     };
   }
 
+    /**
+   * 获取合集信息，根据视频bvid
+   */
+    static bi_get_collect(url) {
+      return axios.get(url).then(resp => {
+        const initialState = JSON.parse(resp.data.match(/(?<=INITIAL_STATE__=).*?(?=;\(function())/)[0])
+        const ugc_season =initialState.videoData.ugc_season
+        return {
+          tracks: ugc_season.sections[0].episodes.map(v => (
+            this.bi_convert_song3({
+              cid: v.cid,
+              part: v.title,
+              page: v.page.page
+            }, v.bvid, v.arc.author, v.arc.pic)
+          )),
+          info: {
+            cover_img_url: ugc_season.cover,
+            title: ugc_season.title,
+            source_url: `https://space.bilibili.com/${ugc_season.mid}/channel/collectiondetail?sid=${ugc_season.id}`
+          }
+        }
+      })
+    }
+
   static parse_url(url) {
     let result;
     const match = /\/\/www.bilibili.com\/audio\/am([0-9]+)/.exec(url);
