@@ -329,10 +329,10 @@ class bilibili {
               cid: v.cid,
               part: v.title,
               page: v.page.page
-            }, v.bvid, v.arc.author, v.arc.pic)
+            }, v.bvid, v.arc.author, v.arc.pic+"@336w_190h_1c_!web-video-rcmd-cover.webp")
           )),
           info: {
-            cover_img_url: ugc_season.cover,
+            cover_img_url: ugc_season.cover+'@480w_300h_1c_!web-space-channel-video.webp',
             title: ugc_season.title,
             source_url: `https://space.bilibili.com/${ugc_season.mid}/channel/collectiondetail?sid=${ugc_season.id}`
           }

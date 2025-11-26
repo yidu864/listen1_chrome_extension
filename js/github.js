@@ -151,7 +151,7 @@ function github() {
         return GithubAPI.get('/gists').then((res) => {
           const result = res.data;
           return result.filter((backupObject) =>
-            backupObject.description.startsWith('updated by Listen1')
+            backupObject.description? backupObject.description.startsWith('updated by Listen1'):false
           );
         });
       },
