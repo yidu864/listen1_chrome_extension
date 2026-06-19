@@ -116,7 +116,7 @@
                           ng-class-even="'even'"
                           ng-click="chooseDialogOption(playlist.info.id)"
                         >
-                          <img ng-src="{{ playlist.info.cover_img_url }}" />
+                          <img loading="lazy" ng-src="{{ playlist.info.cover_img_url }}" />
                           <h2>{{ playlist.info.title }}</h2>
                         </li>
                       </ul>
@@ -231,7 +231,7 @@
                           ng-class-even="'even'"
                           ng-click="mergePlaylist(playlist.info.id)"
                         >
-                          <img ng-src="{{ playlist.info.cover_img_url }}" />
+                          <img loading="lazy" ng-src="{{ playlist.info.cover_img_url }}" />
                           <h2>{{ playlist.info.title }}</h2>
                         </li>
                       </ul>
@@ -624,6 +624,7 @@
                                 <li ng-repeat="i in result ">
                                   <div class="u-cover">
                                     <img
+                                      loading="lazy"
                                       ng-src="{{i.cover_img_url}}"
                                       ng-click="showPlaylist(i.id)"
                                     />
@@ -678,6 +679,7 @@
                                 <li ng-repeat="i in myPlatformPlaylists">
                                   <div class="u-cover">
                                     <img
+                                      loading="lazy"
                                       ng-src="{{i.cover_img_url}}"
                                       ng-click="showPlaylist(i.id)"
                                     />
@@ -875,7 +877,7 @@
                                   >
                                     <div class="title">
                                       <a ng-click="showPlaylist(playlist.id)">
-                                        <img
+                                        <img loading="lazy"
                                           ng-src="{{ playlist.img_url }}"
                                           err-src="https://y.gtimg.cn/mediastyle/global/img/playlist_300.png"
                                         />
@@ -1518,7 +1520,7 @@
                             <div ng-repeat="source in loginSourceList">
                               <div ng-show="is_login(source)">
                                 <div class="usercard">
-                                  <img ng-src="{{musicAuth[source].avatar}}" />
+                                  <img loading="lazy" ng-src="{{musicAuth[source].avatar}}" />
                                   <div class="usercard-title">
                                     <div class="usercard-nickname">
                                       {{musicAuth[source].nickname}}
@@ -1560,7 +1562,7 @@
                           >
                             <div class="detail-head">
                               <div class="detail-head-cover">
-                                <img
+                                <img loading="lazy"
                                   ng-src="{{ cover_img_url }}"
                                   err-src="https://y.gtimg.cn/mediastyle/global/img/singer_300.png"
                                 />
@@ -1800,7 +1802,7 @@
                             <div class="playsong-detail">
                               <div class="detail-head">
                                 <div class="detail-head-cover">
-                                  <img
+                                  <img loading="lazy"
                                     ng-src="{{ currentPlaying.img_url  }}"
                                     err-src="https://y.gtimg.cn/mediastyle/global/img/album_300.png"
                                   />
@@ -1896,7 +1898,7 @@
                         ng-if="playlist.length > 0"
                         ng-click="toggleNowPlaying()"
                       >
-                        <img
+                        <img loading="lazy"
                           ng-src="{{ currentPlaying.img_url }}"
                           err-src="https://y.gtimg.cn/mediastyle/global/img/album_300.png"
                         />
@@ -2153,7 +2155,7 @@
                         ng-class-even="'even'"
                         ng-click="chooseDialogOption(playlist.info.id)"
                       >
-                        <img err-src="https://y.gtimg.cn/mediastyle/global/img/playlist_300.png" ng-src="{{ playlist.info.cover_img_url }}" />
+                        <img loading="lazy" err-src="https://y.gtimg.cn/mediastyle/global/img/playlist_300.png" ng-src="{{ playlist.info.cover_img_url }}" />
                         <h2>{{ playlist.info.title }}</h2>
                       </li>
                     </ul>
@@ -2274,7 +2276,7 @@
                         ng-class-even="'even'"
                         ng-click="mergePlaylist(playlist.info.id)"
                       >
-                        <img err-src="https://y.gtimg.cn/mediastyle/global/img/playlist_300.png" ng-src="{{ playlist.info.cover_img_url }}" />
+                        <img loading="lazy" err-src="https://y.gtimg.cn/mediastyle/global/img/playlist_300.png" ng-src="{{ playlist.info.cover_img_url }}" />
                         <h2>{{ playlist.info.title }}</h2>
                       </li>
                     </ul>
@@ -2689,7 +2691,7 @@
                             <ul  ng-style="{'padding-bottom':playlist.length == 0?'0px':'120px'}" class="playlist-covers">
                               <li ng-repeat="i in result ">
                                 <div class="u-cover">
-                                  <img
+                                  <img loading="lazy"
                                   err-src="https://y.gtimg.cn/mediastyle/global/img/playlist_300.png"
                                     ng-src="{{i.cover_img_url}}"
                                     ng-click="showPlaylist(i.id)"
@@ -2748,7 +2750,7 @@
                             <ul ng-style="{'padding-bottom':playlist.length == 0?'0px':'140px'}"  class="playlist-covers">
                               <li ng-repeat="i in myPlatformPlaylists">
                                 <div class="u-cover">
-                                  <img
+                                  <img loading="lazy"
                                   err-src="https://y.gtimg.cn/mediastyle/global/img/playlist_300.png"
                                     ng-src="{{i.cover_img_url}}"
                                     ng-click="showPlaylist(i.id)"
@@ -2902,7 +2904,7 @@
                                   ng-mouseleave="options=false"
                                   ng-dblclick="addAndPlay(song)"
                                 >
-                                <img
+                                <img loading="lazy" width="46" height="46"
                                 add-and-play="song"
                                         ng-src="{{ song.img_url }}?param=224y224"
                                         err-src="https://y.gtimg.cn/mediastyle/global/img/playlist_300.png"
@@ -2983,7 +2985,7 @@
                                 >
                                 <!-- <a ng-click="showPlaylist(playlist.id)"> -->
                                   <div class="u-cover">
-                                  <img
+                                  <img loading="lazy" width="60" height="60"
                                       ng-click="showPlaylist(playlist.id)"
                                       ng-src="{{ playlist.img_url }}?param=512y512"
                                       err-src="https://y.gtimg.cn/mediastyle/global/img/playlist_300.png"
@@ -3634,7 +3636,7 @@
                             <div ng-show="is_login(source)">
                               <div style="width: 500px;background-color: var(--theme-color-hover);
                               color: var(--theme-color);cursor: default;" class="usercard">
-                                <img 
+                                <img loading="lazy"
                                 err-src="https://y.gtimg.cn/mediastyle/global/img/playlist_300.png"
                                 ng-src="{{musicAuth[source].avatar}}" />
                                 <div class="usercard-title">
@@ -3681,7 +3683,7 @@
                         >
                           <div class="detail-head">
                             <div class="detail-head-cover">
-                              <img
+                              <img loading="lazy"
                                 ng-src="{{ cover_img_url.replace('/300/','/500/').replace('/240/','/512/').replace('/T002R300x300M','/T002R800x800M') }}"
                                 err-src="https://y.gtimg.cn/mediastyle/global/img/singer_300.png"
                               />
@@ -3854,7 +3856,7 @@
                               drag-zone-type="'application/listen1-song'"
                               drop-zone-ondrop="onPlaylistSongDrop(list_id, song, arg1, arg2, arg3)"
                             >
-                            <img err-src="https://y.gtimg.cn/mediastyle/global/img/playlist_300.png" add-and-play="song" ng-src="{{ song.img_url }}?param=224y224" alt="">
+                             <img loading="lazy" width="46" height="46" err-src="https://y.gtimg.cn/mediastyle/global/img/playlist_300.png" add-and-play="song" ng-src="{{ song.img_url }}?param=224y224" alt="">
                             <div class="title-and-artist">
                             <div class="container">
                               <div class="title">
@@ -3958,8 +3960,8 @@
                       <div>
                       <div class="detail-head-cover">
                         <div ng-if="window_type=='track'"  class="covershadow" style="background-image:url({{currentPlaying.img_url}}?param=224y224);opacity: 1;z-index: -1;"></div>
-                        <img
-                      
+                        <img loading="lazy"
+
                         id="trackbackground" 
                           ng-src="{{ currentPlaying.img_url.replace('224y224','1024y1024').replace('/120/','/1024/').replace('/T002R300x300M','/T002R800x800M') }}?param=1024y1024"
                           err-src="https://y.gtimg.cn/mediastyle/global/img/album_300.png"
@@ -4091,7 +4093,7 @@
                         c:song.stageId === getSongIdByIndex(currentIndex+1),
                         def:song.stageId === getSongIdByIndex(currentIndex+2)||song.stageId === getSongIdByIndex(currentIndex-2)}" class="hid"
                             id="song{{ song.id }}" ng-repeat="song in staged_playlist track by song.stageId" draggable="true">
-                    <img
+                    <img loading="lazy"
                     err-src="https://y.gtimg.cn/mediastyle/global/img/album_300.png"
                     ng-src="{{song.img_url.replace('/120/','/300/')}}?param=300y300" alt="">
                     </li>

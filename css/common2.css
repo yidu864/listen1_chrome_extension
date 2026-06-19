@@ -524,6 +524,7 @@ ul.detail-songlist li .u-cover img {
   transition: all 0.1s ease-in-out 0s;
   box-sizing: border-box;
   width: 100%;
+  aspect-ratio: 1 / 1;
   border-radius: 0.75em;
   /* min-width: 136px;
   max-width: 100%; */
