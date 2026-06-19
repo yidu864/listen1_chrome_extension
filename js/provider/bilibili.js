@@ -367,22 +367,23 @@ class bilibili {
      */
     static bi_get_playlistxuan(url) {
       const fullId = getParameterByName('list_id', url);
+      const page = parseInt(getParameterByName('page', url), 10) || 1;
       const suffix = fullId.slice('biplaylistxuan_'.length);
 
       if (suffix.startsWith('my')) {
         const mediaId = suffix.slice(2);
-        return this._get_fav_resource(mediaId);
+        return this._get_fav_resource(mediaId, page);
       }
       if (suffix.startsWith('toview')) {
         return this._get_toview();
       }
-      return this._get_collected_fav(suffix);
+      return this._get_collected_fav(suffix, page);
     }
 
-    static _get_fav_resource(mediaId) {
+    static _get_fav_resource(mediaId, page = 1) {
       return {
         success: (fn) => {
-          const target = `https://api.bilibili.com/x/v3/fav/resource/list?media_id=${mediaId}&pn=1&ps=20`;
+          const target = `https://api.bilibili.com/x/v3/fav/resource/list?media_id=${mediaId}&pn=${page}&ps=20`;
           axios.get(target).then((response) => {
             const d = response.data.data;
             const info = {
@@ -400,8 +401,9 @@ class bilibili {
                 pic: item.cover,
               })
             );
-            fn({ info, tracks });
-          }).catch(() => fn({ info: {}, tracks: [] }));
+            const total = d.info.media_count || 0;
+            fn({ info, tracks, page, hasMore: page * 20 < total, total });
+          }).catch(() => fn({ info: {}, tracks: [], page, hasMore: false, total: 0 }));
         },
       };
     }
@@ -433,10 +435,10 @@ class bilibili {
       };
     }
 
-    static _get_collected_fav(seasonId) {
+    static _get_collected_fav(seasonId, page = 1) {
       return {
         success: (fn) => {
-          const target = `https://api.bilibili.com/x/space/fav/season/list?season_id=${seasonId}&pn=1&ps=20`;
+          const target = `https://api.bilibili.com/x/space/fav/season/list?season_id=${seasonId}&pn=${page}&ps=20`;
           axios.get(target).then((response) => {
             const d = response.data.data;
             const info = {
@@ -454,8 +456,9 @@ class bilibili {
                 pic: item.cover,
               })
             );
-            fn({ info, tracks });
-          }).catch(() => fn({ info: {}, tracks: [] }));
+            const total = d.info.media_count || 0;
+            fn({ info, tracks, page, hasMore: page * 20 < total, total });
+          }).catch(() => fn({ info: {}, tracks: [], page, hasMore: false, total: 0 }));
         },
       };
     }
@@ -464,6 +467,25 @@ class bilibili {
      * 获取用户的所有收藏夹列表（callback 风格）
      * 返回 [{ id, title, desc }] 用于 dialog 展示
      */
+    static _fetch_collected_fav_pages(uid, page, allFolders, fn) {
+      axios.get(`https://api.bilibili.com/x/v3/fav/folder/collected/list?pn=${page}&ps=50&up_mid=${uid}&platform=web`).then((res) => {
+        const list = res.data.data.list || [];
+        list.forEach((f) => {
+          allFolders.push({
+            id: `biplaylistxuan_${f.id}`,
+            title: f.title,
+            desc: `${f.media_count || 0}个内容`,
+          });
+        });
+        const total = res.data.data.total || 0;
+        if (page * 50 < total) {
+          this._fetch_collected_fav_pages(uid, page + 1, allFolders, fn);
+        } else {
+          fn(allFolders);
+        }
+      }).catch(() => fn(allFolders));
+    }
+
     static bi_get_fav_folders() {
       return {
         success: (fn) => {
@@ -474,32 +496,24 @@ class bilibili {
           };
           cookieGet({ url: 'https://www.bilibili.com', name: 'DedeUserID' }, (cookie) => {
             if (!cookie) {
-              fn([toview]);
+              fn({ toview, own: [], collected: [] });
               return;
             }
-            const ownUrl = 'https://api.bilibili.com/x/v3/fav/folder/list4navigate';
-            const collectedUrl = `https://api.bilibili.com/x/v3/fav/folder/collected/list?pn=1&ps=20&up_mid=${cookie.value}&platform=web`;
-            Promise.all([
-              axios.get(ownUrl),
-              axios.get(collectedUrl).catch(() => ({ data: { data: { list: [] } } })),
-            ]).then(([ownRes, collectedRes]) => {
-              const folders = [toview];
-              (ownRes.data.data.list || []).forEach((f) => {
-                folders.push({
+            const ownUrl = 'https://api.bilibili.com/x/v3/fav/folder/created/list-all';
+            axios.get(ownUrl).then((ownRes) => {
+              const listAll = ownRes.data.data || [];
+              const own = [];
+              (Array.isArray(listAll) ? listAll : (listAll.list || [])).forEach((f) => {
+                own.push({
                   id: `biplaylistxuan_my${f.id}`,
                   title: f.title,
                   desc: `${f.media_count || 0}个内容`,
                 });
               });
-              (collectedRes.data.data.list || []).forEach((f) => {
-                folders.push({
-                  id: `biplaylistxuan_${f.id}`,
-                  title: f.title,
-                  desc: `${f.media_count || 0}个内容`,
-                });
+              this._fetch_collected_fav_pages(cookie.value, 1, [], (collected) => {
+                fn({ toview, own, collected });
               });
-              fn(folders);
-            }).catch(() => fn([toview]));
+            }).catch(() => fn({ toview, own: [], collected: [] }));
           });
         },
       };

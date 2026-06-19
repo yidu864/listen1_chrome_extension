@@ -1800,3 +1800,41 @@ svg.searchspinner {
   border-radius: var(--default-border-radius);
 }
 /* widget all-playlist-filter end */
+
+.load-more {
+  text-align: center;
+  padding: 16px 0;
+  cursor: pointer;
+  color: var(--link-default-color);
+  font-size: 14px;
+  user-select: none;
+}
+.load-more:hover {
+  color: var(--link-active-color);
+}
+
+.bili-fav-search {
+  width: calc(100% - 20px);
+  margin-bottom: 12px;
+}
+.bili-fav-section {
+  margin-bottom: 8px;
+}
+.bili-fav-section-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-subtitle-color);
+  padding: 6px 0;
+  margin: 0;
+}
+.bili-fav-load-more {
+  text-align: center;
+  padding: 8px 0;
+  cursor: pointer;
+  color: var(--link-default-color);
+  font-size: 12px;
+  user-select: none;
+}
+.bili-fav-load-more:hover {
+  color: var(--link-active-color);
+}

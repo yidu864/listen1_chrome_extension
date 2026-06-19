@@ -193,6 +193,9 @@ angular.module('listenone').controller('NavigationController', [
         $scope.list_id = data.info.id || '';
         $scope.is_mine = (data.info.id || '').slice(0, 2) === 'my';
         $scope.is_local = (data.info.id || '').slice(0, 2) === 'lm';
+        $scope.page = data.page || 1;
+        $scope.hasMore = data.hasMore || false;
+        $scope.total = data.total || 0;
 
         MediaService.queryPlaylist(data.info.id, 'favorite').success((res) => {
           // success 函数可能在异步回调中执行，需要手动触发脏检查
@@ -202,6 +205,18 @@ angular.module('listenone').controller('NavigationController', [
         });
 
         $scope.window_type = 'list';
+      });
+    };
+
+    $scope.loadMore = () => {
+      const nextPage = ($scope.page || 1) + 1;
+      MediaService.getPlaylist($scope.list_id, false, nextPage).success((data) => {
+        if (data.tracks) {
+          Array.prototype.push.apply($scope.songs, data.tracks);
+        }
+        $scope.page = data.page || nextPage;
+        $scope.hasMore = data.hasMore || false;
+        $scope.total = data.total || 0;
       });
     };
 
@@ -217,12 +232,21 @@ angular.module('listenone').controller('NavigationController', [
     $scope.showBiliFavDialog = () => {
       $scope.showDialog(13);
       $scope.dialog_title = 'B站收藏夹';
-      $scope.biliFavPlaylists = [{ id: '', title: '加载中...', desc: '' }];
-      bilibili.bi_get_fav_folders().success((list) => {
+      $scope.biliFavData = { toview: null, own: [], collected: [] };
+      $scope.biliOwnLimit = 10;
+      $scope.biliCollectedLimit = 10;
+      $scope.biliFavSearch = '';
+      bilibili.bi_get_fav_folders().success((data) => {
         $timeout(() => {
-          $scope.biliFavPlaylists = list;
+          $scope.biliFavData = data;
         }, 0);
       });
+    };
+    $scope.loadMoreOwn = () => {
+      $scope.biliOwnLimit += 10;
+    };
+    $scope.loadMoreCollected = () => {
+      $scope.biliCollectedLimit += 10;
     };
 
     $scope.loadBiliFavPlaylist = (listId) => {

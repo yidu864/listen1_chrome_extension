@@ -359,16 +359,54 @@
                         </div>
                       </div>
                       <div class="dialog-bili-fav" ng-show="dialog_type==13">
-                        <ul class="nav masthead-nav">
-                          <li ng-repeat="pl in biliFavPlaylists track by $index"
-                            ng-click="loadBiliFavPlaylist(pl.id)"
-                          >
-                            <div class="sidebar-block">
-                              <a>{{ pl.title }}</a>
-                              <span class="desc">{{ pl.desc }}</span>
-                            </div>
-                          </li>
-                        </ul>
+                        <input class="form-control bili-fav-search" ng-model="biliFavSearch" placeholder="搜索收藏夹..." />
+
+                        <div class="bili-fav-section" ng-if="biliFavData.toview">
+                          <h4 class="bili-fav-section-title">稍后再看</h4>
+                          <ul class="nav masthead-nav">
+                            <li ng-click="loadBiliFavPlaylist(biliFavData.toview.id)">
+                              <div class="sidebar-block">
+                                <a>{{ biliFavData.toview.title }}</a>
+                                <span class="desc">{{ biliFavData.toview.desc }}</span>
+                              </div>
+                            </li>
+                          </ul>
+                        </div>
+
+                        <div class="bili-fav-section" ng-if="biliFavData.own.length > 0">
+                          <h4 class="bili-fav-section-title">我创建的</h4>
+                          <ul class="nav masthead-nav">
+                            <li ng-repeat="pl in biliFavData.own | filter:biliFavSearch | limitTo: biliOwnLimit track by pl.id"
+                              ng-click="loadBiliFavPlaylist(pl.id)"
+                            >
+                              <div class="sidebar-block">
+                                <a>{{ pl.title }}</a>
+                                <span class="desc">{{ pl.desc }}</span>
+                              </div>
+                            </li>
+                          </ul>
+                          <div class="bili-fav-load-more" ng-show="biliFavData.own.length > biliOwnLimit" ng-click="loadMoreOwn()">
+                            <a>加载更多 (共{{biliFavData.own.length}}个收藏夹)</a>
+                          </div>
+                        </div>
+
+                        <div class="bili-fav-section" ng-if="biliFavData.collected.length > 0">
+                          <h4 class="bili-fav-section-title">我收藏的</h4>
+                          <ul class="nav masthead-nav">
+                            <li ng-repeat="pl in biliFavData.collected | filter:biliFavSearch | limitTo: biliCollectedLimit track by pl.id"
+                              ng-click="loadBiliFavPlaylist(pl.id)"
+                            >
+                              <div class="sidebar-block">
+                                <a>{{ pl.title }}</a>
+                                <span class="desc">{{ pl.desc }}</span>
+                              </div>
+                            </li>
+                          </ul>
+                          <div class="bili-fav-load-more" ng-show="biliFavData.collected.length > biliCollectedLimit" ng-click="loadMoreCollected()">
+                            <a>加载更多 (共{{biliFavData.collected.length}}个收藏夹)</a>
+                          </div>
+                        </div>
+
                         <div class="buttons">
                           <button
                             class="btn btn-warning warning-button"
@@ -1758,6 +1796,9 @@
                                 </div>
                               </li>
                             </ul>
+                            <div class="load-more" ng-show="hasMore" ng-click="loadMore()">
+                              <a>加载更多 (共{{total}}首)</a>
+                            </div>
                           </div>
                           <!-- now playing window-->
                           <div
@@ -2404,16 +2445,54 @@
                       </div>
                     </div>
                     <div class="dialog-bili-fav" ng-show="dialog_type==13">
-                      <ul class="nav masthead-nav">
-                        <li ng-repeat="pl in biliFavPlaylists track by $index"
-                          ng-click="loadBiliFavPlaylist(pl.id)"
-                        >
-                          <div class="sidebar-block">
-                            <a>{{ pl.title }}</a>
-                            <span class="desc">{{ pl.desc }}</span>
-                          </div>
-                        </li>
-                      </ul>
+                      <input class="form-control bili-fav-search" ng-model="biliFavSearch" placeholder="搜索收藏夹..." />
+
+                      <div class="bili-fav-section" ng-if="biliFavData.toview">
+                        <h4 class="bili-fav-section-title">稍后再看</h4>
+                        <ul class="nav masthead-nav">
+                          <li ng-click="loadBiliFavPlaylist(biliFavData.toview.id)">
+                            <div class="sidebar-block">
+                              <a>{{ biliFavData.toview.title }}</a>
+                              <span class="desc">{{ biliFavData.toview.desc }}</span>
+                            </div>
+                          </li>
+                        </ul>
+                      </div>
+
+                      <div class="bili-fav-section" ng-if="biliFavData.own.length > 0">
+                        <h4 class="bili-fav-section-title">我创建的</h4>
+                        <ul class="nav masthead-nav">
+                          <li ng-repeat="pl in biliFavData.own | filter:biliFavSearch | limitTo: biliOwnLimit track by pl.id"
+                            ng-click="loadBiliFavPlaylist(pl.id)"
+                          >
+                            <div class="sidebar-block">
+                              <a>{{ pl.title }}</a>
+                              <span class="desc">{{ pl.desc }}</span>
+                            </div>
+                          </li>
+                        </ul>
+                        <div class="bili-fav-load-more" ng-show="biliFavData.own.length > biliOwnLimit" ng-click="loadMoreOwn()">
+                          <a>加载更多 (共{{biliFavData.own.length}}个收藏夹)</a>
+                        </div>
+                      </div>
+
+                      <div class="bili-fav-section" ng-if="biliFavData.collected.length > 0">
+                        <h4 class="bili-fav-section-title">我收藏的</h4>
+                        <ul class="nav masthead-nav">
+                          <li ng-repeat="pl in biliFavData.collected | filter:biliFavSearch | limitTo: biliCollectedLimit track by pl.id"
+                            ng-click="loadBiliFavPlaylist(pl.id)"
+                          >
+                            <div class="sidebar-block">
+                              <a>{{ pl.title }}</a>
+                              <span class="desc">{{ pl.desc }}</span>
+                            </div>
+                          </li>
+                        </ul>
+                        <div class="bili-fav-load-more" ng-show="biliFavData.collected.length > biliCollectedLimit" ng-click="loadMoreCollected()">
+                          <a>加载更多 (共{{biliFavData.collected.length}}个收藏夹)</a>
+                        </div>
+                      </div>
+
                       <div class="buttons">
                         <button
                           class="btn btn-warning warning-button"
@@ -3911,10 +3990,13 @@
                               </div>
                               <div class="time">{{song.duration}}</div>
                             </li>
-                          </ul>
-                        </div>
-                        <!-- now playing window-->
-                      
+                            </ul>
+                            <div class="load-more" ng-show="hasMore" ng-click="loadMore()">
+                              <a>加载更多 (共{{total}}首)</a>
+                            </div>
+                          </div>
+                          <!-- now playing window-->
+                        
                       </div>
                     </div>
                   </div>

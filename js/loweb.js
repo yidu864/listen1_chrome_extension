@@ -190,11 +190,11 @@ const MediaService = {
     };
   },
 
-  getPlaylist(listId, useCache = true) {
+  getPlaylist(listId, useCache = true, page = 1) {
     const provider = getProviderByItemId(listId);
-    const url = `/playlist?list_id=${listId}`;
+    const url = `/playlist?list_id=${listId}&page=${page}`;
     let hit = null;
-    if (useCache) {
+    if (useCache && page === 1) {
       hit = playlistCache.get(listId);
     }
 
@@ -206,7 +206,7 @@ const MediaService = {
     return {
       success: (fn) =>
         provider.get_playlist(url).success((playlist) => {
-          if (provider !== myplaylist && provider !== localmusic) {
+          if (page === 1 && provider !== myplaylist && provider !== localmusic) {
             playlistCache.set(listId, playlist);
           }
           fn(playlist);
