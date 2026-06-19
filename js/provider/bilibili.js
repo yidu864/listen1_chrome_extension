@@ -317,7 +317,7 @@ class bilibili {
   }
 
     /**
-   * 获取合集信息，根据视频bvid
+   * 获取合集信息，根据视频bvid（Promise 风格，给 saveBiliCollect 用）
    */
     static bi_get_collect(url) {
       return axios.get(url).then(resp => {
@@ -334,10 +334,175 @@ class bilibili {
           info: {
             cover_img_url: ugc_season.cover+'@480w_300h_1c_!web-space-channel-video.webp',
             title: ugc_season.title,
+            id: 'bicollect_' + initialState.videoData.bvid,
             source_url: `https://space.bilibili.com/${ugc_season.mid}/channel/collectiondetail?sid=${ugc_season.id}`
           }
         }
       })
+    }
+
+    /**
+     * 合集歌单（callback 风格，给 get_playlist dispatch 用）
+     * list_id: bicollect_{bvid}
+     */
+    static bi_get_collect_playlist(url) {
+      const listId = getParameterByName('list_id', url);
+      const bvid = listId.slice('bicollect_'.length);
+      const pageUrl = `https://www.bilibili.com/${bvid}`;
+      return {
+        success: (fn) => {
+          this.bi_get_collect(pageUrl).then((data) => {
+            fn(data);
+          }).catch(() => fn({ info: {}, tracks: [] }));
+        },
+      };
+    }
+
+    /**
+     * 用户收藏夹歌单
+     * list_id 格式:
+     *   biplaylistxuan_my{mediaId}    — 自己创建的收藏夹
+     *   biplaylistxuan_toview{upMid}  — 稍后再看
+     *   biplaylistxuan_{seasonId}     — 收藏的收藏夹
+     */
+    static bi_get_playlistxuan(url) {
+      const fullId = getParameterByName('list_id', url);
+      const suffix = fullId.slice('biplaylistxuan_'.length);
+
+      if (suffix.startsWith('my')) {
+        const mediaId = suffix.slice(2);
+        return this._get_fav_resource(mediaId);
+      }
+      if (suffix.startsWith('toview')) {
+        return this._get_toview();
+      }
+      return this._get_collected_fav(suffix);
+    }
+
+    static _get_fav_resource(mediaId) {
+      return {
+        success: (fn) => {
+          const target = `https://api.bilibili.com/x/v3/fav/resource/list?media_id=${mediaId}&pn=1&ps=20`;
+          axios.get(target).then((response) => {
+            const d = response.data.data;
+            const info = {
+              cover_img_url: d.info.cover,
+              title: d.info.title,
+              id: `biplaylistxuan_my${mediaId}`,
+              source_url: `https://www.bilibili.com/medialist/detail/${mediaId}`,
+            };
+            const tracks = (d.medias || []).map((item) =>
+              this.bi_convert_song2({
+                bvid: item.bvid,
+                title: item.title,
+                author: item.upper.name,
+                mid: item.upper.mid,
+                pic: item.cover,
+              })
+            );
+            fn({ info, tracks });
+          }).catch(() => fn({ info: {}, tracks: [] }));
+        },
+      };
+    }
+
+    static _get_toview() {
+      return {
+        success: (fn) => {
+          const target = 'https://api.bilibili.com/x/v2/history/toview/web';
+          axios.get(target).then((response) => {
+            const list = response.data.data.list || [];
+            const info = {
+              cover_img_url: list.length > 0 ? (list[0].cover || list[0].pic || list[0].cover43) : '',
+              title: '稍后再看',
+              id: 'biplaylistxuan_toview',
+              source_url: 'https://www.bilibili.com/medialist/detail/toview',
+            };
+            const tracks = list.map((item) =>
+              this.bi_convert_song2({
+                bvid: item.bvid,
+                title: item.title,
+                author: item.owner.name,
+                mid: item.owner.mid,
+                pic: item.cover || item.pic || item.cover43,
+              })
+            );
+            fn({ info, tracks });
+          }).catch(() => fn({ info: {}, tracks: [] }));
+        },
+      };
+    }
+
+    static _get_collected_fav(seasonId) {
+      return {
+        success: (fn) => {
+          const target = `https://api.bilibili.com/x/space/fav/season/list?season_id=${seasonId}&pn=1&ps=20`;
+          axios.get(target).then((response) => {
+            const d = response.data.data;
+            const info = {
+              cover_img_url: d.info.cover,
+              title: d.info.title,
+              id: `biplaylistxuan_${seasonId}`,
+              source_url: `https://www.bilibili.com/medialist/detail/${seasonId}`,
+            };
+            const tracks = (d.medias || []).map((item) =>
+              this.bi_convert_song2({
+                bvid: item.bvid,
+                title: item.title,
+                author: item.upper.name,
+                mid: item.upper.mid,
+                pic: item.cover,
+              })
+            );
+            fn({ info, tracks });
+          }).catch(() => fn({ info: {}, tracks: [] }));
+        },
+      };
+    }
+
+    /**
+     * 获取用户的所有收藏夹列表（callback 风格）
+     * 返回 [{ id, title, desc }] 用于 dialog 展示
+     */
+    static bi_get_fav_folders() {
+      return {
+        success: (fn) => {
+          const toview = {
+            id: 'biplaylistxuan_toview',
+            title: '稍后再看',
+            desc: 'B站稍后再看列表',
+          };
+          cookieGet({ url: 'https://www.bilibili.com', name: 'DedeUserID' }, (cookie) => {
+            if (!cookie) {
+              fn([toview]);
+              return;
+            }
+            const ownUrl = 'https://api.bilibili.com/x/v3/fav/folder/list4navigate';
+            const collectedUrl = `https://api.bilibili.com/x/v3/fav/folder/collected/list?pn=1&ps=20&up_mid=${cookie.value}&platform=web`;
+            Promise.all([
+              axios.get(ownUrl),
+              axios.get(collectedUrl).catch(() => ({ data: { data: { list: [] } } })),
+            ]).then(([ownRes, collectedRes]) => {
+              const folders = [toview];
+              (ownRes.data.data.list || []).forEach((f) => {
+                folders.push({
+                  id: `biplaylistxuan_my${f.id}`,
+                  title: f.title,
+                  desc: `${f.media_count || 0}个内容`,
+                });
+              });
+              (collectedRes.data.data.list || []).forEach((f) => {
+                folders.push({
+                  id: `biplaylistxuan_${f.id}`,
+                  title: f.title,
+                  desc: `${f.media_count || 0}个内容`,
+                });
+              });
+              fn(folders);
+            }).catch(() => fn([toview]));
+          });
+        },
+      };
     }
 
   static parse_url(url) {
@@ -459,6 +624,10 @@ class bilibili {
     switch (list_id) {
       case 'biplaylist':
         return this.bi_get_playlist(url);
+      case 'biplaylistxuan':
+        return this.bi_get_playlistxuan(url);
+      case 'bicollect':
+        return this.bi_get_collect_playlist(url);
       case 'bialbum':
         return this.bi_album(url);
       case 'biartist':

@@ -3,7 +3,7 @@
 /* eslint-disable no-shadow */
 /* eslint-disable no-unused-vars */
 /* eslint-disable no-param-reassign */
-/* global angular notyf i18next MediaService l1Player hotkeys isElectron require GithubClient lastfm */
+/* global angular notyf i18next MediaService l1Player hotkeys isElectron require GithubClient lastfm bilibili */
 // control main view of page, it can be called any place
 angular.module('listenone').controller('NavigationController', [
   '$scope',
@@ -190,9 +190,9 @@ angular.module('listenone').controller('NavigationController', [
         $scope.cover_img_url = data.info.cover_img_url;
         $scope.playlist_title = data.info.title;
         $scope.playlist_source_url = data.info.source_url;
-        $scope.list_id = data.info.id;
-        $scope.is_mine = data.info.id.slice(0, 2) === 'my';
-        $scope.is_local = data.info.id.slice(0, 2) === 'lm';
+        $scope.list_id = data.info.id || '';
+        $scope.is_mine = (data.info.id || '').slice(0, 2) === 'my';
+        $scope.is_local = (data.info.id || '').slice(0, 2) === 'lm';
 
         MediaService.queryPlaylist(data.info.id, 'favorite').success((res) => {
           // success 函数可能在异步回调中执行，需要手动触发脏检查
@@ -212,6 +212,22 @@ angular.module('listenone').controller('NavigationController', [
         l1Player.setNewPlaylist($scope.songs);
         l1Player.play();
       });
+    };
+
+    $scope.showBiliFavDialog = () => {
+      $scope.showDialog(13);
+      $scope.dialog_title = 'B站收藏夹';
+      $scope.biliFavPlaylists = [{ id: '', title: '加载中...', desc: '' }];
+      bilibili.bi_get_fav_folders().success((list) => {
+        $timeout(() => {
+          $scope.biliFavPlaylists = list;
+        }, 0);
+      });
+    };
+
+    $scope.loadBiliFavPlaylist = (listId) => {
+      $scope.closeDialog();
+      $scope.showPlaylist(listId);
     };
 
     $scope.showDialog = (dialog_type, data) => {
@@ -584,6 +600,7 @@ angular.module('listenone').controller('NavigationController', [
             notyf.success('导入我的歌单成功');
             $scope.gistRestoreLoading = false;
             $rootScope.$broadcast('myplaylist:update');
+            $rootScope.$broadcast('favoriteplaylist:update');
           });
         },
         (err) => {
