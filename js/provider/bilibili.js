@@ -499,7 +499,7 @@ class bilibili {
               fn({ toview, own: [], collected: [] });
               return;
             }
-            const ownUrl = 'https://api.bilibili.com/x/v3/fav/folder/created/list-all';
+            const ownUrl = `https://api.bilibili.com/x/v3/fav/folder/created/list-all?up_mid=${cookie.value}`;
             axios.get(ownUrl).then((ownRes) => {
               const listAll = ownRes.data.data || [];
               const own = [];
