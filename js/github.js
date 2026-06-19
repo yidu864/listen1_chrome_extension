@@ -7,51 +7,66 @@ function github() {
   const client_id = 'e099a4803bb1e2e773a3';
   const client_secret = '81fbfc45c65af8c0fbf2b4dae6f23f22e656cfb8';
 
-  const GithubAPI = axios.create({
-    baseURL: API_URL,
-    headers: { accept: 'application/json' },
-  });
-  GithubAPI.interceptors.request.use((config) => {
-    const accessToken = localStorage.getObject('githubOauthAccessKey');
-    // eslint-disable-next-line no-param-reassign
-    config.headers.Authorization = `token ${accessToken}`;
-    return config;
-  });
+  const hasWindow = typeof window !== 'undefined' && window.document;
+
+  let GithubAPI;
+  if (hasWindow) {
+    GithubAPI = axios.create({
+      baseURL: API_URL,
+      headers: { accept: 'application/json' },
+    });
+    GithubAPI.interceptors.request.use((config) => {
+      const accessToken = localStorage.getObject('githubOauthAccessKey');
+      config.headers.Authorization = `token ${accessToken}`;
+      return config;
+    });
+  }
 
   const Github = {
     status: 0,
     username: '',
   };
 
-  window.GithubClient = {
+  function saveToken(token) {
+    if (hasWindow) {
+      localStorage.setItem('githubOauthAccessKey', JSON.stringify(token));
+    } else {
+      chrome.storage.local.set({ githubOauthAccessKey: token });
+    }
+  }
+
+  self.GithubClient = {
     github: {
       handleCallback: (code, cb) => {
         const url = `${OAUTH_URL}/access_token`;
-        const params = {
-          client_id,
-          client_secret,
-          code,
+        const params = { client_id, client_secret, code };
+        const done = (ak) => {
+          if (ak) saveToken(ak);
+          if (cb !== undefined) cb(ak);
         };
-        axios
-          .post(url, '', {
-            params,
-            headers: { accept: 'application/json' },
+
+        if (hasWindow) {
+          axios
+            .post(url, '', {
+              params,
+              headers: { accept: 'application/json' },
+            })
+            .then((res) => done(res.data.access_token));
+        } else {
+          fetch(url, {
+            method: 'POST',
+            headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
+            body: JSON.stringify(params),
           })
-          .then((res) => {
-            const ak = res.data.access_token;
-            if (ak)
-              localStorage.setItem('githubOauthAccessKey', JSON.stringify(ak));
-            if (cb !== undefined) {
-              cb(ak);
-            }
-          });
+            .then((res) => res.json())
+            .then((data) => done(data.access_token));
+        }
       },
       openAuthUrl: () => {
         Github.status = 1;
         const url = `${OAUTH_URL}/authorize?client_id=${client_id}&scope=gist`;
         if (isElectron()) {
-          // normal window for link
-          const { BrowserWindow } = require('@electron/remote'); // eslint-disable-line import/no-unresolved
+          const { BrowserWindow } = require('@electron/remote');
           let win = new BrowserWindow({
             width: 1000,
             height: 670,
@@ -78,7 +93,19 @@ function github() {
         }
       },
       updateStatus: async (callback) => {
-        const access_token = localStorage.getObject('githubOauthAccessKey');
+        let access_token;
+        if (hasWindow) {
+          access_token = localStorage.getObject('githubOauthAccessKey');
+          if (access_token == null && chrome && chrome.storage && chrome.storage.local) {
+            const result = await new Promise((resolve) => {
+              chrome.storage.local.get('githubOauthAccessKey', resolve);
+            });
+            access_token = result.githubOauthAccessKey;
+            if (access_token) {
+              localStorage.setItem('githubOauthAccessKey', JSON.stringify(access_token));
+            }
+          }
+        }
         if (access_token == null) {
           Github.status = 0;
         } else {
@@ -95,7 +122,9 @@ function github() {
         }
       },
       logout: () => {
-        localStorage.removeItem('githubOauthAccessKey');
+        if (hasWindow) {
+          localStorage.removeItem('githubOauthAccessKey');
+        }
         Github.status = 0;
       },
     },
@@ -107,7 +136,6 @@ function github() {
         result['listen1_backup.json'] = {
           content: JSON.stringify(jsonObject),
         };
-        // const markdown = '# My Listen1 Playlists\n';
         const playlistIds = jsonObject.playerlists;
         const songsCount = playlistIds.reduce((count, playlistId) => {
           const playlist = jsonObject[playlistId];
@@ -142,7 +170,6 @@ function github() {
         }
 
         const url = gistFiles['listen1_backup.json'].raw_url;
-        // const { size } = gistFiles['listen1_backup.json'];
         GithubAPI.get(url).then((res) => callback(res.data));
         return null;
       },

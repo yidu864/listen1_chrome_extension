@@ -1,5 +1,8 @@
 /* eslint-disable no-unused-vars */
 /* global GithubClient */
+
+importScripts('github.js');
+
 chrome.action.onClicked.addListener((tab) => {
   chrome.tabs.create(
     {
